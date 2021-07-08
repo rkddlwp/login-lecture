@@ -15,8 +15,9 @@ class UserStorage {  //static은 인스턴스를 생성 안해도 클래스에 �
     return userInfo
   }
 
-  static getUsers(...fields) {  // 파라미터를 비구조화로 리스트화.
-    // const users = this.#users  
+  static #getUsers(data, isAll, fields) {
+    const users = JSON.parse(data);
+    if (isAll) return users;
     const newUsers = fields.reduce((newUsers, field) => {  //reduce 첫번째 인자로는 초깃값 {} (16번 줄에 지정가능), field 인자에는 리스트에 요소가 차례대로 순회
       if (users.hasOwnProperty(field)) {  //hasOwnProperty는 users에 field 프로퍼티가 있는지 체크  
         newUsers[field] = users[field];  // users가 field 인자를 가지고 있으면 키 , 값을 newUsers에 넣어줌 (비구조화) 
@@ -24,6 +25,17 @@ class UserStorage {  //static은 인스턴스를 생성 안해도 클래스에 �
       return newUsers;
     }, {});
     return newUsers;
+  }
+
+  static getUsers(isAll, ...fields) {  // 파라미터를 비구조화로 리스트화.
+    return fs
+    .readFile("./src/databases/users.json")
+    .then((data) => {
+      return this.#getUsers(data, isAll, fields);
+      
+    })
+    .catch(console.error);
+
   }
 
   static getUserInfo(id) {
@@ -36,14 +48,18 @@ class UserStorage {  //static은 인스턴스를 생성 안해도 클래스에 �
     .catch(console.error);
   }
 
-  static save(userInfo) {
-    // const users = this.#users;
+  static async save(userInfo) {
+    const users = await this.getUsers(true);
+    if (users.id.includes(userInfo.id)) {
+      throw "이미 존재하는 아이디입니다.";
+    } else {
     users.id.push(userInfo.id);
     users.name.push(userInfo.name);
     users.psword.push(userInfo.psword);
-    return { success: true }
-
+    fs.writeFile("./src/databases/users.json", JSON.stringify(users));
+    return { success: true };
+    }
+    }
   }
-}
 
 module.exports = UserStorage;
