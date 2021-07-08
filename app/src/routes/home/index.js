@@ -5,8 +5,10 @@ const router = express.Router();
 
 const ctrl =require("./home.ctrl");
 
+//각 url에서 get 또는 post를 요청시 두번째 알규먼츠 실행
 router.get("/", ctrl.output.home);
-router.get("/login", ctrl.output.login);
+router.get("/login", ctrl.output.login); 
+router.get("/register", ctrl.output.register);
 router.post("/login", ctrl.process.login);
 
 module.exports = router;
