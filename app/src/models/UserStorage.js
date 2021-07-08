@@ -10,7 +10,7 @@ class UserStorage {  //static은 인스턴스를 생성 안해도 클래스에 �
     const userInfo = usersKeys.reduce((newUser, info) => {
       newUser[info] = users[info][idx];
       return newUser;
-    }, {});
+    }, {}); 
 
     return userInfo
   }
