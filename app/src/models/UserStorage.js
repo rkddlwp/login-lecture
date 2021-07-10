@@ -9,7 +9,7 @@ class UserStorage {  //static은 인스턴스를 생성 안해도 클래스에 �
       const query = "SELECT * FROM users WHERE id = ?"
       db.query(query, [id], (err, data) => {   // ?에 id가 들어간다 (보안상에 이유라고 알아두면 됨) 
         if (err) reject(`${err}`); // err는 오브젝트라  문자열로 던져준다. 실제 서비스 구현에서는 이렇게 하면 안됨.
-        resolve(data[0]);
+        else resolve(data[0]);
       });
     });
   }
