@@ -1,64 +1,27 @@
 "use strict";
 
-const fs = require("fs").promises;
+const db = require("../config/db");
 
 class UserStorage {  //static은 인스턴스를 생성 안해도 클래스에 접근 가능하게 해줌 
-  static #getUserInfo(data, id) {
-    const users = JSON.parse(data);
-    const idx = users.id.indexOf(id);
-    const usersKeys = Object.keys(users); // => [id, psword, name]
-    const userInfo = usersKeys.reduce((newUser, info) => {
-      newUser[info] = users[info][idx];
-      return newUser;
-    }, {}); 
-
-    return userInfo
-  }
-
-  static #getUsers(data, isAll, fields) {
-    const users = JSON.parse(data);
-    if (isAll) return users;
-    const newUsers = fields.reduce((newUsers, field) => {  //reduce 첫번째 인자로는 초깃값 {} (16번 줄에 지정가능), field 인자에는 리스트에 요소가 차례대로 순회
-      if (users.hasOwnProperty(field)) {  //hasOwnProperty는 users에 field 프로퍼티가 있는지 체크  
-        newUsers[field] = users[field];  // users가 field 인자를 가지고 있으면 키 , 값을 newUsers에 넣어줌 (비구조화) 
-      }
-      return newUsers;
-    }, {});
-    return newUsers;
-  }
-
-  static getUsers(isAll, ...fields) {  // 파라미터를 비구조화로 리스트화.
-    return fs
-    .readFile("./src/databases/users.json")
-    .then((data) => {
-      return this.#getUsers(data, isAll, fields);
-      
-    })
-    .catch(console.error);
-
-  }
 
   static getUserInfo(id) {
-    return fs
-    .readFile("./src/databases/users.json")
-    .then((data) => {
-      return this.#getUserInfo(data, id);
-      
-    })
-    .catch(console.error);
+    return new Promise((resolve, reject) => {     // 콜백함수 안에서 return 하면 그 함수에 할당되는 것이므로 Promise를 사용해줌
+      const query = "SELECT * FROM users WHERE id = ?"
+      db.query(query, [id], (err, data) => {   // ?에 id가 들어간다 (보안상에 이유라고 알아두면 됨) 
+        if (err) reject(`{err}`); // err는 오브젝트라  문자열로 던져준다. 실제 서비스 구현에서는 이렇게 하면 안됨.
+        resolve(data[0]);
+      });
+    });
   }
 
   static async save(userInfo) {
-    const users = await this.getUsers(true);
-    if (users.id.includes(userInfo.id)) {
-      throw "이미 존재하는 아이디입니다.";
-    } else {
-    users.id.push(userInfo.id);
-    users.name.push(userInfo.name);
-    users.psword.push(userInfo.psword);
-    fs.writeFile("./src/databases/users.json", JSON.stringify(users));
-    return { success: true };
-    }
+    return new Promise((resolve, reject) => {     // 콜백함수 안에서 return 하면 그 함수에 할당되는 것이므로 Promise를 사용해줌
+      const query = "INSERT INTO users(id, name, psword) VALUES(?, ?, ?);";
+      db.query(query, [userInfo.id, userInfo.name, userInfo.psword], (err, data) => {   // ?에 id가 들어간다 (보안상에 이유라고 알아두면 됨) 
+        if (err) reject(`${err}`); // err는 오브젝트라  문자열로 던져준다. 실제 서비스 구현에서는 이렇게 하면 안됨.
+        resolve({ success: true });
+      });
+    });
     }
   }
 

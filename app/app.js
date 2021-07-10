@@ -3,6 +3,8 @@
 //모듈
 const express = require("express"); //express module을 찾아옴
 const bodyParser = require("body-parser");
+const dotenv = require("dotenv");   // dotenv는 환경변수 설정을 관리해줌, 개발자마다 개발하는 os가 다르기에 사용
+dotenv.config();
 const app = express();
 
 //라우팅
