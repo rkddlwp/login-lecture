@@ -4,12 +4,11 @@
 const express = require("express"); //express module을 찾아옴
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");   // dotenv는 환경변수 설정을 관리해줌, 개발자마다 개발하는 os가 다르기에 사용
-const morgan = require('morgan'); // 로그관리
 
 const app = express();
 dotenv.config();
 
-const accessLogStream = require("./src/config/log");
+
 //라우팅
 const home = require("./src/routes/home");
 
@@ -20,8 +19,7 @@ app.use(express.static(`${__dirname}/src/public`));
 app.use(express.json());
 //URL을 통해 전달되는 데이터에 한글, 공백 같은 문자가 포함될 경우에 제대로 인식되지 않는 문제 해결
 app.use(express.urlencoded({ extended : true }));
-app.use(morgan("dev"));
-app.use(morgan("tiny", { stream: accessLogStream }));
+
 
 app.use("/", home); //use = 미들웨어를 등록해주는 메서드
 
